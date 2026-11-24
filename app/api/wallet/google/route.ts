@@ -3,16 +3,35 @@ import jwt from 'jsonwebtoken';
 
 export const runtime = 'nodejs';
 
+
 function getCredentials() {
   const encoded = process.env.GOOGLE_WALLET_SERVICE_ACCOUNT_JSON_BASE64;
-  if (!encoded) throw new Error('Missing GOOGLE_WALLET_SERVICE_ACCOUNT_JSON_BASE64 environment variable.');
-  const json = Buffer.from(encoded, 'base64').toString('utf8');
-  const credentials = JSON.parse(json) as { client_email?: string; private_key?: string };
-  if (!credentials.client_email || !credentials.private_key) {
-    throw new Error('Service account JSON must contain client_email and private_key.');
+
+  if (!encoded) {
+    throw new Error(
+      'Missing GOOGLE_WALLET_SERVICE_ACCOUNT_JSON_BASE64 environment variable.'
+    );
   }
-  return credentials;
+
+  const json = Buffer.from(encoded, 'base64').toString('utf8');
+
+  const credentials = JSON.parse(json) as {
+    client_email?: string;
+    private_key?: string;
+  };
+
+  if (!credentials.client_email || !credentials.private_key) {
+    throw new Error(
+      'Service account JSON must contain client_email and private_key.'
+    );
+  }
+
+  return {
+    client_email: credentials.client_email,
+    private_key: credentials.private_key,
+  };
 }
+
 
 export async function GET() {
   try {
